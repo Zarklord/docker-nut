@@ -16,7 +16,7 @@ RUN apt-get update && \
     apt-get clean
 
 RUN [ -d /etc/nut ] && find /etc/nut/ -type f -exec rm {} \; || false
-RUN [ -d /etc/nginx/sites-enabled ] && find /etc/nginx/sites-enabled -type f -exec rm {} \; || false
+RUN [ -f /etc/nginx/sites-enabled/default ] && rm /etc/nginx/sites-enabled/default || false
 
 HEALTHCHECK --interval=10s --timeout=5s \
     CMD /healthcheck.sh
