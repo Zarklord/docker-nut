@@ -41,14 +41,22 @@ cat <<EOF >/etc/nut/upsd.users
 	upsmon primary
 EOF
 
+
 cat /etc/nut/upsmon.sys.conf >/etc/nut/upsmon.conf
-for I_CONF in "$(env | grep '^MONITOR_')"
+
+OIFS=$IFS
+IFS=$'\n'
+
+for I_CONF in $(env | grep '^MONITOR_')
 do
 MONITOR=$(echo "$I_CONF" | sed 's/^[^=]*=//g')
 cat <<EOF >>/etc/nut/upsmon.conf
 MONITOR ${MONITOR}
 EOF
 done
+
+IFS=$OIFS
+
 cat <<EOF >>/etc/nut/upsmon.conf
 MINSUPPLIES ${MINSUPPLIES}
 RUN_AS_USER ${USER}
