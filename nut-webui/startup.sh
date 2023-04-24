@@ -33,10 +33,14 @@ OIFS=$IFS
 IFS="
 "
 
+echo $(env | grep '^MONITOR_')
+
 echo >/etc/nut/hosts.conf
 for I_CONF in $(env | grep '^MONITOR_')
 do
+echo ${I_CONF}
 MONITOR=$(echo "$I_CONF" | sed 's/^[^=]*=//g')
+echo ${MONITOR}
 cat <<EOF >>/etc/nut/hosts.conf
 MONITOR ${MONITOR}
 EOF
