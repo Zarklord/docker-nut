@@ -28,7 +28,7 @@ then run it as follows:
 ```
 docker run -d \
    -p 3493:3493 \
-   -v /path/to/nut-config:/etc/nut \
+   -v /path/to/ups.conf:/etc/nut/ups.conf \
    [ --privileged | --device ... ] \
    gpdm/nut-upsd[:<tag>]
 ```

@@ -1,8 +1,11 @@
-FROM alpine:edge
+FROM alpine:3.17
 
 MAINTAINER Zarklord
+
 ARG BUILD_DATE
 ARG VCS_REF
+ARG NUT_VERSION=2.8.0-r4
+
 LABEL org.label-schema.build-date=$BUILD_DATE \
     org.label-schema.schema-version="1.0" \
     org.label-schema.description="This docker image implements Network UPS Tools (NUT) upsd daemon" \
@@ -10,22 +13,24 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
     org.label-schema.vcs-ref=$VCS_REF \
     org.label-schema.vcs-url=https://github.com/zarklord/docker-nut/tree/master/nut-upsd
 
-# 'nut' package is only available from testing branch -- add it to the repo list
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+RUN apk add nut=$NUT_VERSION \
+      libcrypto1.1 libssl1.1 libusb musl net-snmp-libs mosquitto-clients
 
-RUN apk add --no-cache nut
+RUN [ -d /etc/nut ] && find /etc/nut/ -type f -exec rm {} \; || false
 
-# rename included config files to .sample, bail out with failure if /etc/nut would not exist
-RUN [ -d /etc/nut ] && find /etc/nut/ -type f -exec mv {} {}.sample \; || false
+COPY files/nut.conf /etc/nut/nut.conf
 
-COPY files/startup.sh /startup.sh
-
-RUN chmod 700 /startup.sh
-
-RUN mkdir -p /var/run/nut && \
-    chown nut:nut /var/run/nut && \
-    chmod 700 /var/run/nut
-
-ENTRYPOINT ["/startup.sh"]
+ENV GROUP=nut \
+    USER=nut \
+    API_USER= \
+    API_PASSWORD= \
+    MQTT_HOST= \
+    MQTT_PORT=1883 \
+    MQTT_USERNAME= \
+    MQTT_PASSWORD=
 
 EXPOSE 3493
+COPY etc/nut/* /etc/nut/
+COPY --chmod=0755 usr/bin/* /usr/bin/
+COPY --chmod=0755 files/startup.sh /startup.sh
+ENTRYPOINT /startup.sh

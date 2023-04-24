@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# ONLINE   : UPS is back online
+# ONBATT   : UPS is on battery
+# LOWBATT  : UPS has a low battery (if also on battery, it's "critical")
+# FSD      : UPS is being shutdown by the primary (FSD = "Forced Shutdown")
+# COMMOK   : Communications established with the UPS
+# COMMBAD  : Communications lost to the UPS
+# SHUTDOWN : The system is being shutdown
+# REPLBATT : The UPS battery is bad and needs to be replaced
+# NOCOMM   : A UPS is unavailable (can't be contacted for monitoring)
+# NOPARENT : The process that shuts down the system has died (shutdown impossible)
+
+/usr/bin/mosquitto_pub -h ${MQTT_HOST} -p ${MQTT_PORT} -u ${MQTT_USERNAME} -P ${MQTT_PASSWORD} -m ${NOTIFYTYPE} -t ups/${UPSNAME}/notify
