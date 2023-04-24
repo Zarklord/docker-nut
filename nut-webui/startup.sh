@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 #  Provided to you under the terms of the Simplified BSD License.
 #  
