@@ -29,12 +29,12 @@
 echo "*** NUT upsd startup ***"
 
 ups_conf="/etc/nut/ups.conf"
-if [ -f ${ups_conf} ]; then
+if [ ! -f ${ups_conf} ]; then
 	printf "ERROR: '%s' does not exist. You should create one, have a look at the README.\n" ${ups_conf}
 	exit
 fi
 upsmon_conf="/etc/nut/upsmon.conf.user"
-if [ -f ${upsmon_conf} ]; then
+if [ ! -f ${upsmon_conf} ]; then
 	printf "ERROR: '%s' does not exist. You should create one, have a look at the README.\n" ${upsmon_conf}
 	exit
 fi
