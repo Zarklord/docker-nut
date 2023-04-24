@@ -30,7 +30,8 @@
 echo "*** NUT web server startup ***"
 
 OIFS=$IFS
-IFS=$'\n'
+IFS="
+"
 
 echo >/etc/nut/hosts.conf
 for I_CONF in $(env | grep '^MONITOR_')

@@ -31,7 +31,8 @@ echo "*** NUT monitor startup ***"
 cat /etc/nut/upsmon.sys.conf >/etc/nut/upsmon.conf
 
 OIFS=$IFS
-IFS=$'\n'
+IFS="
+"
 
 for I_CONF in $(env | grep '^MONITOR_')
 do

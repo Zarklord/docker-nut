@@ -29,7 +29,8 @@
 echo "*** NUT upsd startup ***"
 
 OIFS=$IFS
-IFS=$'\n'
+IFS="
+"
 
 echo <<EOF >/etc/nut/ups.conf
 pollinterval = 1
@@ -44,7 +45,7 @@ UPS_CONF=$(echo "$I_CONF" | sed 's/^[^=]*=//g')
 cat <<EOF >>/etc/nut/ups.conf
 [${UPS_NAME}]
 EOF
-printf "\n\t$UPS_CONF\n" | sed 's/; ?/\n\t/g' >>/etc/nut/ups.conf
+printf "\t$UPS_CONF\n\n" | sed 's/; \?/\n\t/g' >>/etc/nut/ups.conf
 done
 
 cat /etc/nut/ups.conf
