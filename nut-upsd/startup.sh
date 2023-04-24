@@ -49,7 +49,7 @@ for I_CONF in $(env | grep '^MONITOR_')
 do
 MONITOR=$(echo "$I_CONF" | sed 's/^[^=]*=//g')
 cat <<EOF >>/etc/nut/upsmon.conf
-${MONITOR}
+MONITOR ${MONITOR}
 EOF
 done
 cat <<EOF >>/etc/nut/upsmon.conf
