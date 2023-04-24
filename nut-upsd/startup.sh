@@ -47,12 +47,15 @@ chmod 640 /etc/nut/*
 cat /etc/nut/upsmon.sys.conf >/etc/nut/upsmon.conf
 for I_CONF in $(env | grep '^MONITOR_')
 do
+echo $I_CONF
 MONITOR=$(echo "$I_CONF" | sed 's/^[^=]*=//g')
+printf
 cat <<EOF >>/etc/nut/upsmon.conf
 MONITOR ${MONITOR}
 EOF
 done
 cat <<EOF >>/etc/nut/upsmon.conf
+MINSUPPLIES ${MINSUPPLIES}
 RUN_AS_USER ${USER}
 EOF
 

@@ -22,6 +22,7 @@ ENV GROUP=nut \
     USER=nut \
     API_USER= \
     API_PASSWORD= \
+    MINSUPPLIES=0 \
     MQTT_HOST= \
     MQTT_PORT=1883 \
     MQTT_USERNAME= \
