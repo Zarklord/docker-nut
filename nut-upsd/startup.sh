@@ -71,4 +71,4 @@ printf "Starting up the UPS drivers...\n"
 /usr/sbin/upsdrvctl -u root start || { printf "ERROR on driver startup.\n"; exit; }
 
 printf "Starting up the UPS daemon...\n"
-exec /usr/sbin/upsd || { printf "ERROR on daemon startup.\n"; exit; }
+exec /usr/sbin/upsd -D || { printf "ERROR on daemon startup.\n"; exit; }
