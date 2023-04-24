@@ -13,16 +13,19 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
     org.label-schema.vcs-ref=$VCS_REF \
     org.label-schema.vcs-url=https://github.com/zarklord/docker-nut/tree/master/nut-upsd
 
-RUN apk add nut=$NUT_VERSION libcrypto1.1 libssl1.1 libusb musl net-snmp-libs mosquitto-clients
+RUN apk add nut=$NUT_VERSION mosquitto-clients
 
 RUN [ -d /etc/nut ] && find /etc/nut/ -type f -exec rm {} \; || false
 
 ENV GROUP=nut \
     USER=nut \
-    API_USER= \
-    API_PASSWORD=
+    MINSUPPLIES=0 \
+    MQTT_HOST= \
+    MQTT_PORT=1883 \
+    MQTT_USERNAME= \
+    MQTT_PASSWORD=
 
-EXPOSE 3493
 COPY etc/nut/* /etc/nut/
+COPY --chmod=0755 usr/bin/* /usr/bin/
 COPY --chmod=0755 startup.sh /startup.sh
 ENTRYPOINT /startup.sh

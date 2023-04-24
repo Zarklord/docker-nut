@@ -25,22 +25,28 @@
 #  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-echo "*** NUT upsd startup ***"
+echo "*** NUT monitor startup ***"
 
-ups_conf="/etc/nut/ups.conf"
-if [ ! -f ${ups_conf} ]; then
-	printf "ERROR: '%s' does not exist. You should create one, have a look at the README.\n" ${ups_conf}
-	exit
-fi
+cat /etc/nut/upsmon.sys.conf >/etc/nut/upsmon.conf
 
-cat <<EOF >/etc/nut/upsd.users
-[$API_USER]
-    password = $API_PASSWORD
-	actions = set
-	actions = fsd
-	instcmds = all
-	upsmon primary
+OIFS=$IFS
+IFS=$'\n'
+
+for I_CONF in $(env | grep '^MONITOR_')
+do
+MONITOR=$(echo "$I_CONF" | sed 's/^[^=]*=//g')
+cat <<EOF >>/etc/nut/upsmon.conf
+MONITOR ${MONITOR}
 EOF
+done
+
+IFS=$OIFS
+
+cat <<EOF >>/etc/nut/upsmon.conf
+MINSUPPLIES ${MINSUPPLIES}
+RUN_AS_USER ${USER}
+EOF
+
 
 chgrp $GROUP /etc/nut/*
 chmod 640 /etc/nut/*
@@ -50,8 +56,5 @@ chown $USER.$GROUP /dev/shm/nut
 echo 0 > /var/run/nut/upsd.pid && chown $USER.$GROUP /var/run/nut/upsd.pid
 echo 0 > /var/run/upsmon.pid
 
-printf "Starting up the UPS drivers...\n"
-/usr/sbin/upsdrvctl -u root start || { printf "ERROR on driver startup.\n"; exit; }
-
-printf "Starting up the UPS daemon...\n"
-exec /usr/sbin/upsd -u $USER || { printf "ERROR on daemon startup.\n"; exit; }
+printf "Starting up the UPS monitor...\n"
+exec /usr/sbin/upsmon -D || { printf "ERROR on monitor startup.\n"; exit; }
