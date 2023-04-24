@@ -18,8 +18,6 @@ RUN apk add nut=$NUT_VERSION \
 
 RUN [ -d /etc/nut ] && find /etc/nut/ -type f -exec rm {} \; || false
 
-COPY files/nut.conf /etc/nut/nut.conf
-
 ENV GROUP=nut \
     USER=nut \
     API_USER= \
