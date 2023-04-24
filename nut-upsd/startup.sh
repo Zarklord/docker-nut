@@ -32,7 +32,7 @@ OIFS=$IFS
 IFS="
 "
 
-echo <<EOF >/etc/nut/ups.conf
+cat <<EOF >/etc/nut/ups.conf
 pollinterval = 1
 maxretry = 3
 
@@ -47,8 +47,6 @@ cat <<EOF >>/etc/nut/ups.conf
 EOF
 printf "\t$UPS_CONF\n\n" | sed 's/; \?/\n\t/g' >>/etc/nut/ups.conf
 done
-
-cat /etc/nut/ups.conf
 
 IFS=$OIFS
 
@@ -73,4 +71,4 @@ printf "Starting up the UPS drivers...\n"
 /usr/sbin/upsdrvctl -u root start || { printf "ERROR on driver startup.\n"; exit; }
 
 printf "Starting up the UPS daemon...\n"
-exec /usr/sbin/upsd -u $USER || { printf "ERROR on daemon startup.\n"; exit; }
+exec /usr/sbin/upsd || { printf "ERROR on daemon startup.\n"; exit; }
