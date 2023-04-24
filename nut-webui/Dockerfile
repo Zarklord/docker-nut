@@ -11,7 +11,7 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
     org.label-schema.vcs-url=https://github.com/zarklord/docker-nut/tree/master/nut-webui
 
 RUN apt-get update && \
-    apt-get install -y nut-cgi fcgiwrap nginx-light openssl ssl-cert busybox && \
+    apt-get install -y nut-cgi fcgiwrap nginx-light busybox && \
     apt-get auto-remove && \
     apt-get clean
 

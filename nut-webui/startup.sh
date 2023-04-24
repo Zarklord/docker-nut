@@ -29,7 +29,6 @@
 
 echo "*** NUT web server startup ***"
 
-
 OIFS=$IFS
 IFS=$'\n'
 
