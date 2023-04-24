@@ -26,48 +26,31 @@
 #  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-echo "*** NUT upsd startup ***"
+
+echo "*** NUT web server startup ***"
+
 
 OIFS=$IFS
 IFS=$'\n'
 
-echo <<EOF >/etc/nut/ups.conf
-pollinterval = 1
-maxretry = 3
-
-EOF
-
-for I_CONF in $(env | grep '^UPS_')
+echo >/etc/nut/hosts.conf
+for I_CONF in $(env | grep '^MONITOR_')
 do
-UPS_NAME=$(echo "$I_CONF" | sed 's/^UPS_//g' | sed 's/=.*//g')
-UPS_CONF=$(echo "$I_CONF" | sed 's/^[^=]*=//g')
-cat <<EOF >>/etc/nut/ups.conf
-[${UPS_NAME}]
+MONITOR=$(echo "$I_CONF" | sed 's/^[^=]*=//g')
+cat <<EOF >>/etc/nut/hosts.conf
+MONITOR ${MONITOR}
 EOF
-echo "\n\t$UPS_CONF\n" | sed 's/;/\n\t/g' >>/etc/nut/ups.conf
 done
 
 IFS=$OIFS
 
-cat <<EOF >/etc/nut/upsd.users
-[$API_USER]
-    password = $API_PASSWORD
-	actions = set
-	actions = fsd
-	instcmds = all
-	upsmon primary
-EOF
-
 chgrp $GROUP /etc/nut/*
 chmod 640 /etc/nut/*
-mkdir -p -m 2750 /dev/shm/nut
-chown $USER.$GROUP /dev/shm/nut
-[ -e /var/run/nut ] || ln -s /dev/shm/nut /var/run
-echo 0 > /var/run/nut/upsd.pid && chown $USER.$GROUP /var/run/nut/upsd.pid
-echo 0 > /var/run/upsmon.pid
 
-printf "Starting up the UPS drivers...\n"
-/usr/sbin/upsdrvctl -u root start || { printf "ERROR on driver startup.\n"; exit; }
+# run the fcgiwrap daemon
+printf "Starting up the fcgiwrap daemon ...\n"
+service fcgiwrap start || { printf "ERROR on daemon startup.\n"; exit; }
 
-printf "Starting up the UPS daemon...\n"
-exec /usr/sbin/upsd -u $USER || { printf "ERROR on daemon startup.\n"; exit; }
+# run nginx
+printf "Starting up the web server ...\n"
+exec nginx -g 'daemon off;'

@@ -10,33 +10,24 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
     org.label-schema.vcs-ref=$VCS_REF \
     org.label-schema.vcs-url=https://github.com/zarklord/docker-nut/tree/master/nut-webui
 
-ENV SSL_PRIVATE_KEY= \
-    SSL_CERTIFICATE=
-
 RUN apt-get update && \
     apt-get install -y nut-cgi fcgiwrap nginx-light openssl ssl-cert busybox && \
     apt-get auto-remove && \
     apt-get clean
 
-COPY files/startup.sh /startup.sh
-COPY files/healthcheck.sh /healthcheck.sh
-COPY files/etc/nginx/sites-available/nut-default-tcp80 files/etc/nginx/sites-available/nut-default-tcp443 /etc/nginx/sites-available/
-
-# rename included config files to .sample, bail out with failure if /etc/nut would not exist
-RUN [ -d /etc/nut ] && find /etc/nut/ -type f -regex '.*\.conf$' -exec mv {} {}.sample \; || false
-
-# disable default website in nginx, bail out with failure if the file would not exist
-RUN [ -f /etc/nginx/sites-enabled/default ] && rm /etc/nginx/sites-enabled/default || false
-
-# register our default tcp-80 website instead
-RUN ln -s /etc/nginx/sites-available/nut-default-tcp80 /etc/nginx/sites-enabled/nut-default-tcp80
-
-RUN chmod 700 /startup.sh /healthcheck.sh
-
-ENTRYPOINT ["/startup.sh"]
+RUN [ -d /etc/nut ] && find /etc/nut/ -type f -exec rm {} \; || false
+RUN [ -d /etc/nginx/sites-enabled ] && find /etc/nginx/sites-enabled -type f -exec rm {} \; || false
 
 HEALTHCHECK --interval=10s --timeout=5s \
     CMD /healthcheck.sh
 
+ENV GROUP=nut \
+    USER=nut
+
 EXPOSE 80
-EXPOSE 443
+COPY etc/nut/* /etc/nut/
+COPY etc/nginx/sites-enabled/* /etc/nginx/sites-enabled/
+RUN ln -s /etc/nginx/sites-available/nut-default-tcp80 /etc/nginx/sites-enabled/nut-default-tcp80
+COPY --chmod=0755 startup.sh /startup.sh
+COPY --chmod=0755 healthcheck.sh /healthcheck.sh
+ENTRYPOINT /startup.sh
