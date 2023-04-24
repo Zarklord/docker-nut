@@ -11,23 +11,16 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
     org.label-schema.vcs-url=https://github.com/zarklord/docker-nut/tree/master/nut-webui
 
 RUN apt-get update && \
-    apt-get install -y nut-cgi fcgiwrap nginx-light busybox && \
+    apt-get install -y nut-cgi fcgiwrap nginx-light && \
     apt-get auto-remove && \
     apt-get clean
 
 RUN [ -d /etc/nut ] && find /etc/nut/ -type f -exec rm {} \; || false
 RUN [ -f /etc/nginx/sites-enabled/default ] && rm /etc/nginx/sites-enabled/default || false
 
-HEALTHCHECK --interval=10s --timeout=5s \
-    CMD /healthcheck.sh
-
-ENV GROUP=nut \
-    USER=nut
-
 EXPOSE 80
 COPY etc/nut/* /etc/nut/
 COPY etc/nginx/sites-available/* /etc/nginx/sites-available/
 RUN ln -s /etc/nginx/sites-available/nut-default-tcp80 /etc/nginx/sites-enabled/nut-default-tcp80
 COPY --chmod=0755 startup.sh /startup.sh
-COPY --chmod=0755 healthcheck.sh /healthcheck.sh
 ENTRYPOINT /startup.sh

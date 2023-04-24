@@ -42,10 +42,9 @@ MONITOR ${MONITOR}
 EOF
 done
 
-IFS=$OIFS
+cat /etc/nut/hosts.conf
 
-chgrp $GROUP /etc/nut/*
-chmod 640 /etc/nut/*
+IFS=$OIFS
 
 # run the fcgiwrap daemon
 printf "Starting up the fcgiwrap daemon ...\n"
