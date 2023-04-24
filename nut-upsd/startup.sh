@@ -41,15 +41,10 @@ cat <<EOF >/etc/nut/upsd.users
 	upsmon primary
 EOF
 
-chgrp $GROUP /etc/nut/*
-chmod 640 /etc/nut/*
-
 cat /etc/nut/upsmon.sys.conf >/etc/nut/upsmon.conf
-for I_CONF in $(env | grep '^MONITOR_')
+for I_CONF in "$(env | grep '^MONITOR_')"
 do
-echo $I_CONF
 MONITOR=$(echo "$I_CONF" | sed 's/^[^=]*=//g')
-printf
 cat <<EOF >>/etc/nut/upsmon.conf
 MONITOR ${MONITOR}
 EOF
@@ -59,6 +54,9 @@ MINSUPPLIES ${MINSUPPLIES}
 RUN_AS_USER ${USER}
 EOF
 
+
+chgrp $GROUP /etc/nut/*
+chmod 640 /etc/nut/*
 mkdir -p -m 2750 /dev/shm/nut
 chown $USER.$GROUP /dev/shm/nut
 [ -e /var/run/nut ] || ln -s /dev/shm/nut /var/run
