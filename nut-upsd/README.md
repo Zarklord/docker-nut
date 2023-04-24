@@ -16,7 +16,7 @@ So instead, traditional config files have to be slipped into the container by us
 pull as usual:
 
 ```
-docker pull gpdm/nut-upsd[:<tag>]
+docker pull zarklord/nut-upsd[:<tag>]
 ```
 
 tags:
@@ -30,7 +30,7 @@ docker run -d \
    -p 3493:3493 \
    -v /path/to/ups.conf:/etc/nut/ups.conf \
    [ --privileged | --device ... ] \
-   gpdm/nut-upsd[:<tag>]
+   zarklord/nut-upsd[:<tag>]
 ```
 
 
@@ -42,30 +42,20 @@ As this docker runs only the UPS drivers and the upsd daemon itself,
 you only need these configuration files:
 
 * [ups.conf](https://networkupstools.org/docs/man/nut.conf.html)
-* [upsd.conf](https://networkupstools.org/docs/man/upsd.conf.html)
-* [upsd.users](https://networkupstools.org/docs/man/upsd.users.html)
-
 
 This docker image cannot be configured through environment variables.
 You have to use a config volume as shown:
 
-1. create the *ups.conf*, *upsd.conf* and *upsd.users* config files with your favorite editor
-2. store them into a permanent config directory, e.g. `/data/dockers/nut-upsd/config`
-3. apply proper file permissions and ownership
- ```
-   cd /data/dockers/nut-upsd/config
-   chmod 0400 ups.conf upsd.conf upsd.users
-   chown 100:101 ups.conf upsd.conf upsd.users
- ```
-4. when running the container, point it mount the config directory as a volume, e.g.
-   `-v /data/dockers/nut-upsd/config:/etc/nut`
+1. create the *ups.conf* with your favorite editor
+2. store them into a permanent config directory, e.g. `/data/dockers/nut-upsd/config/ups.conf`
+3. when running the container, point it mount the config directory as a volume, e.g.
+   `-v /data/dockers/nut-upsd/config/ups.conf:/etc/nut/ups.conf`
 
 **The container will fail to start when no volume is mounted, or not all needed files are present!**
 
-Some sample config files are provided for your conventience in the [master repository](https://github.com/gpdm/nut/tree/master/nut-upsd/files/etc/nut).
+A sample config files is provided for your conventience in the [master repository](https://github.com/zarklord/docker-nut/tree/master/nut-upsd/user_files/ups.conf).
 You may use them as a starting point, however I recommed to have a indepth look at the official
 [Network UPS Tools](https://networkupstools.org/) documentation.
-
 
 ## device mapping
 

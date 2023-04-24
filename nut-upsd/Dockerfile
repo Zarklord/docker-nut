@@ -32,5 +32,5 @@ ENV GROUP=nut \
 EXPOSE 3493
 COPY etc/nut/* /etc/nut/
 COPY --chmod=0755 usr/bin/* /usr/bin/
-COPY --chmod=0755 files/startup.sh /startup.sh
+COPY --chmod=0755 startup.sh /startup.sh
 ENTRYPOINT /startup.sh
