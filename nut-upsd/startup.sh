@@ -32,12 +32,12 @@ ups_conf="/etc/nut/ups.conf"
 if [ -f ${ups_conf} ]; then
 	printf "ERROR: '%s' does not exist. You should create one, have a look at the README.\n" ${ups_conf}
 	exit
-done
+fi
 upsmon_conf="/etc/nut/upsmon.conf.user"
 if [ -f ${upsmon_conf} ]; then
 	printf "ERROR: '%s' does not exist. You should create one, have a look at the README.\n" ${upsmon_conf}
 	exit
-done
+fi
 
 cat <<EOF >/etc/nut/upsd.users
 [$API_USER]
