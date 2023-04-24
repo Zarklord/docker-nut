@@ -25,7 +25,6 @@
 #  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-
 echo "*** NUT upsd startup ***"
 
 ups_conf="/etc/nut/ups.conf"
@@ -42,7 +41,10 @@ cat <<EOF >/etc/nut/upsd.users
 	upsmon primary
 EOF
 
-cat /etc/nut/upsmon.conf.sys >/etc/nut/upsmon.conf
+chgrp $GROUP /etc/nut/*
+chmod 640 /etc/nut/*
+
+cat /etc/nut/upsmon.sys.conf >/etc/nut/upsmon.conf
 for I_CONF in $(env | grep '^MONITOR_')
 do
 MONITOR=$(echo "$I_CONF" | sed 's/^[^=]*=//g')
@@ -54,8 +56,6 @@ cat <<EOF >>/etc/nut/upsmon.conf
 RUN_AS_USER ${USER}
 EOF
 
-chgrp $GROUP /etc/nut/*
-chmod 640 /etc/nut/*
 mkdir -p -m 2750 /dev/shm/nut
 chown $USER.$GROUP /dev/shm/nut
 [ -e /var/run/nut ] || ln -s /dev/shm/nut /var/run
