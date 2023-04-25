@@ -12,4 +12,4 @@ The UPS webui, which provides realtime information and statistics on the UPS ove
 
 ## nut-monitor
 
-The UPS monitor, which sends out MQTT messages with the current status of every UPS
+The UPS monitor, which sends out MQTT messages with the current status of every UPS.
