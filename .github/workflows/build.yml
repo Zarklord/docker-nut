@@ -107,10 +107,15 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get Git commit timestamps
+        run: echo "TIMESTAMP=$(git log -1 --pretty=%ct)" >> $GITHUB_ENV
       
       - name: Build
         id: bake
         uses: docker/bake-action@v5
+        env:
+          SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}
         with:
           files: |
             ./docker-bake.hcl
@@ -124,7 +129,7 @@ jobs:
       - name: Export digest
         run: |
           mkdir -p /tmp/digests
-          digest="${{ fromJSON(steps.bake.outputs.metadata).image['containerimage.digest'] }}"
+          digest="${{ fromJSON(steps.bake.outputs.metadata).${{ matrix.target }}['containerimage.digest'] }}"
           touch "/tmp/digests/${digest#sha256:}"
       
       - name: Upload digest
