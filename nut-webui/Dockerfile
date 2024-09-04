@@ -1,4 +1,4 @@
-FROM bitnami/minideb
+FROM debian:stable-slim
 
 RUN apt-get update && \
     apt-get install -y nut-cgi fcgiwrap nginx-light && \
@@ -12,6 +12,8 @@ EXPOSE 80
 COPY ./etc/nut/* /etc/nut/
 COPY ./etc/nginx/sites-available/* /etc/nginx/sites-available/
 RUN ln -s /etc/nginx/sites-available/nut-default-tcp80 /etc/nginx/sites-enabled/nut-default-tcp80
+
 COPY --chmod=0755 ./startup.sh /startup.sh
+
 SHELL ["/bin/bash", "-c"]
 ENTRYPOINT /startup.sh
