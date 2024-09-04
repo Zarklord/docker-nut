@@ -129,7 +129,7 @@ jobs:
       - name: Export digest
         run: |
           mkdir -p /tmp/digests
-          digest="${{ fromJSON(steps.bake.outputs.metadata).${{ matrix.target }}['containerimage.digest'] }}"
+          digest="${{ fromJSON(steps.bake.outputs.metadata)[matrix.target]['containerimage.digest'] }}"
           touch "/tmp/digests/${digest#sha256:}"
       
       - name: Upload digest
