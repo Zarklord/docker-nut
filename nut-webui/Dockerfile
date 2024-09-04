@@ -1,11 +1,5 @@
 FROM bitnami/minideb
 
-MAINTAINER Zarklord
-
-LABEL org.label-schema.description="This is the nut-webui docker image, which implements the web-based UI for Network UPS Tools (NUT)" \
-    org.label-schema.name=nut-webui \
-    org.label-schema.vcs-url=https://github.com/zarklord/docker-nut/tree/master/nut-webui
-
 RUN apt-get update && \
     apt-get install -y nut-cgi fcgiwrap nginx-light && \
     apt-get auto-remove && \
@@ -15,9 +9,9 @@ RUN [ -d /etc/nut ] && find /etc/nut/ -type f -exec rm {} \; || false
 RUN [ -f /etc/nginx/sites-enabled/default ] && rm /etc/nginx/sites-enabled/default || false
 
 EXPOSE 80
-COPY etc/nut/* /etc/nut/
-COPY etc/nginx/sites-available/* /etc/nginx/sites-available/
+COPY ./etc/nut/* /etc/nut/
+COPY ./etc/nginx/sites-available/* /etc/nginx/sites-available/
 RUN ln -s /etc/nginx/sites-available/nut-default-tcp80 /etc/nginx/sites-enabled/nut-default-tcp80
-COPY --chmod=0755 startup.sh /startup.sh
+COPY --chmod=0755 ./startup.sh /startup.sh
 SHELL ["/bin/bash", "-c"]
 ENTRYPOINT /startup.sh
