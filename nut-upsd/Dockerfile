@@ -1,6 +1,6 @@
 FROM alpine:edge
 
-RUN apk add nut libcrypto1.1 libssl1.1 libusb musl net-snmp-libs --no-cache
+RUN apk add nut --no-cache
 
 RUN [ -d /etc/nut ] && find /etc/nut/ -type f -exec rm {} \; || false
 
