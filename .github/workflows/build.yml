@@ -67,6 +67,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs:
+      - prepare
       - metadata
     strategy:
       fail-fast: false
@@ -137,6 +138,7 @@ jobs:
   merge:
     runs-on: ubuntu-latest
     needs:
+      - prepare
       - build
     strategy:
       fail-fast: false
