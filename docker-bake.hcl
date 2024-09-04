@@ -17,7 +17,8 @@ target "nut-monitor-local" {
 
 target "nut-monitor" {
 	inherits = ["nut-monitor-local", "ci_platforms", "docker-metadata-action"]
-	dockerfile = "nut-monitor/Dockerfile"
+	context = "nut-monitor"
+	dockerfile = "Dockerfile"
 }
 
 target "nut-upsd-local" {
@@ -26,7 +27,8 @@ target "nut-upsd-local" {
 
 target "nut-upsd" {
 	inherits = ["nut-upsd-local", "ci_platforms", "docker-metadata-action"]
-	dockerfile = "nut-upsd/Dockerfile"
+	context = "nut-upsd"
+	dockerfile = "Dockerfile"
 }
 
 target "nut-webui-local" {
@@ -35,5 +37,6 @@ target "nut-webui-local" {
 
 target "nut-webui" {
 	inherits = ["nut-webui-local", "ci_platforms", "docker-metadata-action"]
-	dockerfile = "nut-webui/Dockerfile"
+	context = "nut-webui"
+	dockerfile = "Dockerfile"
 }
