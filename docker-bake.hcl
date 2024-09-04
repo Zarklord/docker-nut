@@ -16,7 +16,7 @@ target "nut-monitor-local" {
 }
 
 target "nut-monitor" {
-	inherits = ["nut-monitor-local", "ci_platforms" "docker-metadata-action"]
+	inherits = ["nut-monitor-local", "ci_platforms", "docker-metadata-action"]
 	context = "./"
 	dockerfile = "Dockerfile"
 }
