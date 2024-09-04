@@ -1,19 +1,14 @@
-FROM alpine:3.17
+FROM alpine:edge
 
 MAINTAINER Zarklord
 
-ARG BUILD_DATE
 ARG VCS_REF
-ARG NUT_VERSION=2.8.0-r4
 
-LABEL org.label-schema.build-date=$BUILD_DATE \
-    org.label-schema.schema-version="1.0" \
-    org.label-schema.description="This docker image implements Network UPS Tools (NUT) upsd daemon" \
-    org.label-schema.name=nut-upsd \
-    org.label-schema.vcs-ref=$VCS_REF \
-    org.label-schema.vcs-url=https://github.com/zarklord/docker-nut/tree/master/nut-upsd
+LABEL org.label-schema.description="This docker image implements Network UPS Tools (NUT) ups monitor, which forwards messages to MQTT" \
+    org.label-schema.name=nut-monitor \
+    org.label-schema.vcs-url=https://github.com/zarklord/docker-nut/tree/master/nut-monitor
 
-RUN apk add nut=$NUT_VERSION mosquitto-clients
+RUN apk add nut mosquitto-clients
 
 RUN [ -d /etc/nut ] && find /etc/nut/ -type f -exec rm {} \; || false
 
