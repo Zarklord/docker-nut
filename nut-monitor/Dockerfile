@@ -1,8 +1,12 @@
-FROM alpine:edge
+FROM alpine:latest
 
 RUN apk add nut mosquitto-clients --no-cache
 
 RUN [ -d /etc/nut ] && find /etc/nut/ -type f -exec rm {} \; || false
+
+COPY ./etc/nut/* /etc/nut/
+COPY --chmod=0755 ./usr/bin/* /usr/bin/
+COPY --chmod=0755 ./entrypoint.sh /entrypoint.sh
 
 ENV GROUP=nut \
     USER=nut \
@@ -12,7 +16,5 @@ ENV GROUP=nut \
     MQTT_USERNAME= \
     MQTT_PASSWORD=
 
-COPY ./etc/nut/* /etc/nut/
-COPY --chmod=0755 ./usr/bin/* /usr/bin/
-COPY --chmod=0755 ./startup.sh /startup.sh
-ENTRYPOINT /startup.sh
+ENTRYPOINT ["/entrypoint.sh"]
+CMD [""]
