@@ -43,11 +43,10 @@ EOF
 done
 
 IFS=$OIFS
+chown www-data:www-data /etc/nut/hosts.conf
 
-# run the fcgiwrap daemon
-printf "Starting up the fcgiwrap daemon ...\n"
-service fcgiwrap start || { printf "ERROR on daemon startup.\n"; exit; }
-
-# run nginx
-printf "Starting up the web server ...\n"
-exec nginx -g 'daemon off;'
+a2enconf servername
+a2enmod cgi
+a2enmod remoteip
+echo -e "\n----------------------------------------\n"
+exec apache2ctl -D FOREGROUND

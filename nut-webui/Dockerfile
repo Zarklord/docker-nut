@@ -1,20 +1,26 @@
 FROM debian:stable-slim
 
-RUN apt-get update && \
-    apt-get install -y nut-cgi fcgiwrap nginx-light && \
-    apt-get auto-remove && \
-    apt-get clean
+ENV APACHE_RUN_USER=www-data \
+    APACHE_RUN_GROUP=www-data \
+    APACHE_LOG_DIR=/var/log/apache2
 
-RUN [ -d /etc/nut ] && find /etc/nut/ -type f -exec rm {} \; || false
-RUN [ -f /etc/nginx/sites-enabled/default ] && rm /etc/nginx/sites-enabled/default || false
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    apache2 \
+    nut-cgi \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY ./etc/nut/* /etc/nut/
-COPY ./etc/nginx/sites-available/* /etc/nginx/sites-available/
+RUN rm -f /etc/nut/* \
+    /etc/apache2/sites-available/000-default.conf \
+    /etc/apache2/conf-available/servername.conf
+
+COPY --chown=www-data:www-data ./etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/000-default.conf
+COPY --chown=www-data:www-data ./etc/apache2/conf-available/servername.conf /etc/apache2/conf-available/servername.conf
+COPY --chown=www-data:www-data ./etc/nut/* /etc/nut/
 COPY --chmod=0755 ./entrypoint.sh /entrypoint.sh
 
-RUN ln -s /etc/nginx/sites-available/nut-default-tcp80 /etc/nginx/sites-enabled/nut-default-tcp80
+RUN chown -R www-data:www-data /usr/lib/cgi-bin/nut /usr/share/nut/www && \
+    chmod -R 755 /usr/lib/cgi-bin/nut
 
 EXPOSE 80
 SHELL ["/bin/bash", "-c"]
 ENTRYPOINT ["/entrypoint.sh"]
-CMD [""]
