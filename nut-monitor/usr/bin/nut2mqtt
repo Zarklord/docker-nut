@@ -11,4 +11,20 @@
 # NOCOMM   : A UPS is unavailable (can't be contacted for monitoring)
 # NOPARENT : The process that shuts down the system has died (shutdown impossible)
 
-/usr/bin/mosquitto_pub -h ${MQTT_HOST} -p ${MQTT_PORT} -u ${MQTT_USERNAME} -P ${MQTT_PASSWORD} -m ${NOTIFYTYPE} -t ups/${UPSNAME}/notify
+if [ -z "${MQTT_HOST}" ]; then
+    exit 0
+fi
+
+PORT="${MQTT_PORT:-1883}"
+ARGS="-h ${MQTT_HOST} -p ${PORT} -t ups/${UPSNAME}/notify -m ${NOTIFYTYPE}"
+
+if [ -n "${MQTT_USERNAME}" ]; then
+    ARGS="${ARGS} -u ${MQTT_USERNAME}"
+fi
+
+if [ -n "${MQTT_PASSWORD}" ]; then
+    ARGS="${ARGS} -P ${MQTT_PASSWORD}"
+fi
+
+# shellcheck disable=SC2086
+exec /usr/bin/mosquitto_pub ${ARGS}

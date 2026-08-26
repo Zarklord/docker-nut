@@ -18,7 +18,9 @@ COPY --chown=www-data:www-data ./etc/apache2/conf-available/servername.conf /etc
 COPY --chown=www-data:www-data ./etc/nut/* /etc/nut/
 COPY --chmod=0755 ./entrypoint.sh /entrypoint.sh
 
-RUN chown -R www-data:www-data /usr/lib/cgi-bin/nut /usr/share/nut/www && \
+RUN a2enconf servername && \
+    a2enmod cgi remoteip && \
+    chown -R www-data:www-data /usr/lib/cgi-bin/nut /usr/share/nut/www && \
     chmod -R 755 /usr/lib/cgi-bin/nut
 
 EXPOSE 80

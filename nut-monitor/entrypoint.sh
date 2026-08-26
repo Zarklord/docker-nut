@@ -28,34 +28,35 @@
 #
 echo "*** NUT monitor startup ***"
 
-cat /etc/nut/upsmon.sys.conf >/etc/nut/upsmon.conf
+if [ -n "$(env | grep '^MONITOR_')" ] || [ ! -s /etc/nut/upsmon.conf ]; then
+    cat /etc/nut/upsmon.sys.conf >/etc/nut/upsmon.conf
 
-OIFS=$IFS
-IFS="
+    OIFS=$IFS
+    IFS="
 "
 
-for I_CONF in $(env | grep '^MONITOR_')
-do
-MONITOR=$(echo "$I_CONF" | sed 's/^[^=]*=//g')
-cat <<EOF >>/etc/nut/upsmon.conf
+    for I_CONF in $(env | grep '^MONITOR_')
+    do
+        MONITOR=$(echo "$I_CONF" | sed 's/^[^=]*=//g')
+        cat <<EOF >>/etc/nut/upsmon.conf
 MONITOR ${MONITOR}
 EOF
-done
+    done
 
-IFS=$OIFS
+    IFS=$OIFS
 
-cat <<EOF >>/etc/nut/upsmon.conf
+    cat <<EOF >>/etc/nut/upsmon.conf
 MINSUPPLIES ${MINSUPPLIES}
 RUN_AS_USER ${USER}
 EOF
+fi
 
-
-chgrp $GROUP /etc/nut/*
+chgrp "${GROUP}" /etc/nut/*
 chmod 640 /etc/nut/*
 mkdir -p -m 2750 /dev/shm/nut
-chown $USER.$GROUP /dev/shm/nut
+chown "${USER}:${GROUP}" /dev/shm/nut
 [ -e /var/run/nut ] || ln -s /dev/shm/nut /var/run
-echo 0 > /var/run/nut/upsd.pid && chown $USER.$GROUP /var/run/nut/upsd.pid
+echo 0 > /var/run/nut/upsd.pid && chown "${USER}:${GROUP}" /var/run/nut/upsd.pid
 echo 0 > /var/run/upsmon.pid
 
 printf "Starting up the UPS monitor...\n"

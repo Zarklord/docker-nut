@@ -28,43 +28,47 @@
 #
 echo "*** NUT upsd startup ***"
 
-OIFS=$IFS
-IFS="
-"
-
-cat <<EOF >/etc/nut/ups.conf
+if [ -n "$(env | grep '^UPS_')" ] || [ ! -s /etc/nut/ups.conf ]; then
+    cat <<EOF >/etc/nut/ups.conf
 pollinterval = 1
 maxretry = 3
 
 EOF
 
-for I_CONF in $(env | grep '^UPS_')
-do
-UPS_NAME=$(echo "$I_CONF" | sed 's/^UPS_//g' | sed 's/=.*//g')
-UPS_CONF=$(echo "$I_CONF" | sed 's/^[^=]*=//g')
-cat <<EOF >>/etc/nut/ups.conf
+    OIFS=$IFS
+    IFS="
+"
+
+    for I_CONF in $(env | grep '^UPS_')
+    do
+        UPS_NAME=$(echo "$I_CONF" | sed 's/^UPS_//g' | sed 's/=.*//g')
+        UPS_CONF=$(echo "$I_CONF" | sed 's/^[^=]*=//g')
+        cat <<EOF >>/etc/nut/ups.conf
 [${UPS_NAME}]
 EOF
-printf "\t$UPS_CONF\n\n" | sed 's/; \?/\n\t/g' >>/etc/nut/ups.conf
-done
+        printf "\t$UPS_CONF\n\n" | sed 's/; \?/\n\t/g' >>/etc/nut/ups.conf
+    done
 
-IFS=$OIFS
+    IFS=$OIFS
+fi
 
-cat <<EOF >/etc/nut/upsd.users
-[$API_USER]
-    password = $API_PASSWORD
+if [ -n "${API_USER}" ]; then
+    cat <<EOF >/etc/nut/upsd.users
+[${API_USER}]
+	password = ${API_PASSWORD}
 	actions = set
 	actions = fsd
 	instcmds = all
 	upsmon primary
 EOF
+fi
 
-chgrp $GROUP /etc/nut/*
+chgrp "${GROUP}" /etc/nut/*
 chmod 640 /etc/nut/*
 mkdir -p -m 2750 /dev/shm/nut
-chown $USER.$GROUP /dev/shm/nut
+chown "${USER}:${GROUP}" /dev/shm/nut
 [ -e /var/run/nut ] || ln -s /dev/shm/nut /var/run
-echo 0 > /var/run/nut/upsd.pid && chown $USER.$GROUP /var/run/nut/upsd.pid
+echo 0 > /var/run/nut/upsd.pid && chown "${USER}:${GROUP}" /var/run/nut/upsd.pid
 echo 0 > /var/run/upsmon.pid
 
 printf "Starting up the UPS drivers...\n"

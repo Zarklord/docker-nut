@@ -1,123 +1,121 @@
 # nut-upsd
 
-This is the **nut-upsd** docker image, which implements the UPS drivers and the upsd daemon from https://networkupstools.org/.
+This is the **nut-upsd** docker image, which implements the UPS drivers and the `upsd` daemon from [Network UPS Tools (NUT)](https://networkupstools.org/).
 
-The idea behind this implementation is to have a generic container, which supports monitoring multiple UPS devices from the same container.
-This is different from other implementations, which are intended to support one (1) container per one (1) UPS.
+This container supports monitoring one or more UPS devices simultaneously via USB, serial, or network drivers.
 
-The drawback of this implementation is that the container can't be easily driven by environment variables.
-I mean, yes, technically, I could support a gazillion of env vars, but... uhm ... no! :-)
+## How to Use
 
-So instead, traditional config files have to be slipped into the container by use of a config volume mount.
+Pull the image:
 
-
-## how to use
-
-pull as usual:
-
-```
-docker pull zarklord/nut-upsd[:<tag>]
+```bash
+docker pull zarklord/nut-upsd:latest
 ```
 
-tags:
-* **latest** for most recent (but potentially most broken / unstable) build
-* other version-specific tags (if any) for frozen / stable builds
+## Configuration
 
-then run it as follows:
+You can configure `nut-upsd` in one of two ways:
 
-```
+### Option 1: Environment Variables (Recommended for Simple Setups)
+
+You can define UPS devices directly via environment variables:
+
+| Variable | Description |
+| :--- | :--- |
+| `UPS_<NAME>` | Semicolon-separated driver configuration for the UPS device. |
+| `API_USER` | Username for API / monitor client authentication (optional). |
+| `API_PASSWORD` | Password for API / monitor client authentication (optional). |
+
+**Example:**
+
+```bash
 docker run -d \
-   -p 3493:3493 \
-   -v /path/to/ups.conf:/etc/nut/ups.conf \
-   [ --privileged | --device ... ] \
-   zarklord/nut-upsd[:<tag>]
+  --name nut-upsd \
+  -p 3493:3493 \
+  --privileged \
+  -e UPS_MYUPS="driver = usbhid-ups; port = auto; desc = 'My APC UPS'" \
+  -e API_USER="monuser" \
+  -e API_PASSWORD="monpassword" \
+  zarklord/nut-upsd:latest
 ```
 
+### Option 2: Config Volume Mount (Advanced Setups)
 
-## configuration
+For advanced multi-UPS configurations, mount your custom `ups.conf` into `/etc/nut/ups.conf`:
 
-### main config for upsd
-
-As this docker runs only the UPS drivers and the upsd daemon itself,
-you only need these configuration files:
-
-* [ups.conf](https://networkupstools.org/docs/man/nut.conf.html)
-
-This docker image cannot be configured through environment variables.
-You have to use a config volume as shown:
-
-1. create the *ups.conf* with your favorite editor
-2. store them into a permanent config directory, e.g. `/data/dockers/nut-upsd/config/ups.conf`
-3. when running the container, point it mount the config directory as a volume, e.g.
-   `-v /data/dockers/nut-upsd/config/ups.conf:/etc/nut/ups.conf`
-
-**The container will fail to start when no volume is mounted, or not all needed files are present!**
-
-A sample config files is provided for your conventience in the [master repository](https://github.com/zarklord/docker-nut/tree/master/nut-upsd/user_files/ups.conf).
-You may use them as a starting point, however I recommed to have a indepth look at the official
-[Network UPS Tools](https://networkupstools.org/) documentation.
-
-## device mapping
-
-In order for the ups monitoring to work, you have to map your device tree into the docker container.
-
-### privileged mode
-
-Just pass this option to the container at startup.
-
-`--privileged`
-
-NOTE: This is the least secure approach, as it grants overall privileges to everything.
-
-### device mode
-
-Better than going for privileged mode, is to pass just the individual devices into the container.
-
-This can be done by passing `--device` and `--device-cgroup-rule` commands to docker.
-
-First, identify the device-id, i.e. by running `lsusb`:
-
+```bash
+docker run -d \
+  --name nut-upsd \
+  -p 3493:3493 \
+  -v /path/to/ups.conf:/etc/nut/ups.conf:ro \
+  --privileged \
+  zarklord/nut-upsd:latest
 ```
+
+**Example `ups.conf`:**
+
+```ini
+pollinterval = 1
+maxretry = 3
+
+[myups]
+    driver = usbhid-ups
+    port = auto
+    desc = "Primary Rack UPS"
+```
+
+## Device Mapping
+
+In order for UPS drivers to communicate with your hardware, the USB or serial device must be accessible inside the container.
+
+### Option A: Privileged Mode (Simplest)
+
+Pass `--privileged` to the container:
+
+```bash
+docker run -d --privileged -p 3493:3493 ... zarklord/nut-upsd:latest
+```
+
+### Option B: Specific Device Mapping (More Secure)
+
+Identify your UPS USB device using `lsusb`:
+
+```bash
 $ lsusb
-Bus 007 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
-Bus 004 Device 001: ID 1d6b:0001 Linux Foundation 1.1 root hub
-Bus 003 Device 001: ID 1d6b:0001 Linux Foundation 1.1 root hub
-Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
-Bus 008 Device 002: ID 0bc2:331a Seagate RSS LLC
-Bus 008 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
-Bus 006 Device 002: ID 0665:5161 Cypress Semiconductor USB to Serial			 << generic UPS on USB
-Bus 006 Device 001: ID 1d6b:0001 Linux Foundation 1.1 root hub
-Bus 005 Device 002: ID 051d:0002 American Power Conversion Uninterruptible Power Supply	 << APC UPS on USB
-Bus 005 Device 001: ID 1d6b:0001 Linux Foundation 1.1 root hub
-Bus 002 Device 002: ID f400:f400
-Bus 002 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 005 Device 002: ID 051d:0002 American Power Conversion Uninterruptible Power Supply
 ```
 
-The example above reveals two UPSes attached, one to Bus 5, as device #2, the other on Bus 6, as device #2.
-This translates to the following device paths:
+Find the major and minor device numbers:
 
-```
-/dev/bus/usb/005/002
-/dev/bus/usb/006/002
-```
-
-Get the device major and minor device number like this:
-
-```
-~$ ls -l  /dev/bus/usb/005/002 /dev/bus/usb/006/002
-crwxrwxrwx 1 root root 189, 513 Oct  8 22:06 /dev/bus/usb/005/002
-crwxrwxrwx 1 root root 189, 641 Oct  8 22:06 /dev/bus/usb/006/002
+```bash
+$ ls -l /dev/bus/usb/005/002
+crw-rw-r-- 1 root root 189, 513 Aug 26 10:00 /dev/bus/usb/005/002
 ```
 
-The values we're looking for is in colums 5 and 6 respectively.
+Pass the device path and cgroup rule into docker:
 
-To map these devices now into the container, the devices have to be passed in, together with a control group rule each, matching the major and minor device number.
-
+```bash
+docker run -d \
+  -p 3493:3493 \
+  --device /dev/bus/usb/005/002 \
+  --device-cgroup-rule='c 189:513 rw' \
+  -e UPS_MYUPS="driver = usbhid-ups; port = auto; desc = 'APC UPS'" \
+  zarklord/nut-upsd:latest
 ```
-  docker run [ ... ] \
-  --device /dev/bus/usb/005/002 --device-cgroup-rule='c 189:513 rw'
-  --device /dev/bus/usb/006/002 --device-cgroup-rule='c 189:641 rw'
-  [ ... ]
+
+## Docker Compose Example
+
+```yaml
+services:
+  nut-upsd:
+    image: zarklord/nut-upsd:latest
+    container_name: nut-upsd
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - "3493:3493"
+    environment:
+      - UPS_APC=driver = usbhid-ups; port = auto; desc = 'Main UPS'
+      - API_USER=monuser
+      - API_PASSWORD=monpassword
 ```
-
-

@@ -1,8 +1,9 @@
 group "ci_targets" {
   targets = ["nut-monitor", "nut-upsd", "nut-webui"]
 }
+
 target "ci_platforms" {
-	platforms = ["linux/amd64", "linux/arm64"]
+  platforms = ["linux/amd64", "linux/arm64"]
 }
 
 target "docker-metadata-action" {}
@@ -16,9 +17,9 @@ target "nut-monitor-local" {
 }
 
 target "nut-monitor" {
-	inherits = ["nut-monitor-local", "ci_platforms", "docker-metadata-action"]
-	context = "nut-monitor"
-	dockerfile = "Dockerfile"
+  inherits   = ["nut-monitor-local", "ci_platforms", "docker-metadata-action"]
+  context    = "nut-monitor"
+  dockerfile = "Dockerfile"
 }
 
 target "nut-upsd-local" {
@@ -26,9 +27,9 @@ target "nut-upsd-local" {
 }
 
 target "nut-upsd" {
-	inherits = ["nut-upsd-local", "ci_platforms", "docker-metadata-action"]
-	context = "nut-upsd"
-	dockerfile = "Dockerfile"
+  inherits   = ["nut-upsd-local", "ci_platforms", "docker-metadata-action"]
+  context    = "nut-upsd"
+  dockerfile = "Dockerfile"
 }
 
 target "nut-webui-local" {
@@ -36,7 +37,7 @@ target "nut-webui-local" {
 }
 
 target "nut-webui" {
-	inherits = ["nut-webui-local", "ci_platforms", "docker-metadata-action"]
-	context = "nut-webui"
-	dockerfile = "Dockerfile"
+  inherits   = ["nut-webui-local", "ci_platforms", "docker-metadata-action"]
+  context    = "nut-webui"
+  dockerfile = "Dockerfile"
 }

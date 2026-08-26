@@ -33,20 +33,24 @@ OIFS=$IFS
 IFS="
 "
 
-echo >/etc/nut/hosts.conf
-for I_CONF in $(env | grep '^MONITOR_')
-do
-MONITOR=$(echo "$I_CONF" | sed 's/^[^=]*=//g')
-cat <<EOF >>/etc/nut/hosts.conf
+if [ -n "$(env | grep '^MONITOR_')" ] || [ ! -s /etc/nut/hosts.conf ]; then
+    echo >/etc/nut/hosts.conf
+    OIFS=$IFS
+    IFS="
+"
+    for I_CONF in $(env | grep '^MONITOR_')
+    do
+        MONITOR=$(echo "$I_CONF" | sed 's/^[^=]*=//g')
+        cat <<EOF >>/etc/nut/hosts.conf
 MONITOR ${MONITOR}
 EOF
-done
+    done
+    IFS=$OIFS
+fi
 
-IFS=$OIFS
-chown www-data:www-data /etc/nut/hosts.conf
+chown www-data:www-data /etc/nut/hosts.conf 2>/dev/null || true
 
-a2enconf servername
-a2enmod cgi
-a2enmod remoteip
+a2enconf servername 2>/dev/null || true
+a2enmod cgi remoteip 2>/dev/null || true
 echo -e "\n----------------------------------------\n"
 exec apache2ctl -D FOREGROUND

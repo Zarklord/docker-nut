@@ -1,58 +1,67 @@
 # nut-webui
 
-This is the **nut-webui** docker image, which implements the web-based UI for the upsd daemon from https://networkupstools.org/.
+This is the **nut-webui** docker image, which implements the web-based monitoring interface for Network UPS Tools (NUT) using Apache2 and `nut-cgi`.
 
+## How to Use
 
-## how to use
+Pull the image:
 
-pull as usual:
- 
+```bash
+docker pull zarklord/nut-webui:latest
 ```
-docker pull zarklord/nut-webui[:<tag>]
-```
 
-tags:
-* **latest** for most recent (but potentially most broken / unstable) build
-* other version-specific tags (if any) for frozen / stable builds
+## Configuration
 
-then run it as follows:
+You can configure `nut-webui` in one of two ways:
 
-```
+### Option 1: Environment Variables (Recommended)
+
+Pass one or more `MONITOR_<NAME>` variables to define the UPS daemons to monitor:
+
+```bash
 docker run -d \
-   -p 80:80 \
-   -v /path/to/nut-config:/etc/nut \
-   zarklord/nut-webui[:<tag>]
+  --name nut-webui \
+  -p 80:80 \
+  -e MONITOR_1="myups@nut-upsd:3493 \"Primary Rack UPS\"" \
+  zarklord/nut-webui:latest
 ```
 
-## configuration
+### Option 2: Config Volume Mount
 
-### ports
+Mount a custom `hosts.conf` into `/etc/nut/hosts.conf`:
 
-This docker runs nginx, and thus exposes the following ports:
+```bash
+docker run -d \
+  --name nut-webui \
+  -p 80:80 \
+  -v /path/to/hosts.conf:/etc/nut/hosts.conf:ro \
+  zarklord/nut-webui:latest
+```
 
-* TCP/80 for plain http
+**Example `hosts.conf`:**
 
-### main config for upsstats
+```
+MONITOR myups@nut-upsd:3493 "Primary Rack UPS"
+```
 
-For the upsstats CGI tools, you need this configuration file:
+## Docker Compose Example
 
-* [hosts.conf](https://networkupstools.org/docs/man/hosts.conf.html)
-This file cannot be provided through environment variables, 
-you have to use a config volume as shown:
+```yaml
+services:
+  nut-webui:
+    image: zarklord/nut-webui:latest
+    container_name: nut-webui
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      - MONITOR_1=myups@nut-upsd:3493 "Primary Rack UPS"
+```
 
-1. create the  *hosts.conf* config file with your favorite editor
-2. store it into a permanent config directory, e.g. `/data/dockers/nut-webui/config`
-3. when running the container, point it mount the config directory as a file into **/etc/nut/hosts.conf**, e.g.
-   `-v /data/dockers/nut-webui/config/hosts.conf:/etc/nut/hosts.conf`
+## Screenshots
 
-**The container will fail to start when no volume is mounted, or not all needed files are present!**
+### Main View
+![Main View](https://raw.githubusercontent.com/zarklord/docker-nut/main/nut-webui/docs/main.png)
 
-A sample config file is provided for your conventience in the [master repository](https://github.com/zarklord/docker-nut/tree/master/nut-webui/user_files/hosts.conf).
-You may use it as a starting point, however I recommed to have a indepth look at the official
-[Network UPS Tools](https://networkupstools.org/) documentation.
-
-# Screenshots
-
-![Main View](https://raw.githubusercontent.com/zarklord/docker-nut/master/nut-webui/docs/main.png)
-
-![Detail View](https://raw.githubusercontent.com/zarklord/docker-nut/master/nut-webui/docs/detail.png)
+### Detail View
+![Detail View](https://raw.githubusercontent.com/zarklord/docker-nut/main/nut-webui/docs/detail.png)
